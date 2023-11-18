@@ -19,5 +19,43 @@ poetry install
 To start Screenie, run the main script
 
 ```
+poetry run screenie
+```
 
+### Arguments
+
+The `screenie` command accepts the following arguments:
+
+- `--prompt`: Choice of default prompt. Default is "attenborough".
+- `--voice`: Choice of voice.
+- `--voice-provider`: Choice of voice provider. Options are "openai" and "elevenlabs". Default is "openai".
+- `--screenshot`: Flag to indicate whether to take a screenshot. Default is False.
+- `--picture`: Flag to indicate whether to take a picture. Default is False.
+
+Please note that you can't take both a screenshot and a picture at the same time.
+
+#### Examples
+
+To run `screenie` with the default settings
+
+```bash
+screenie
+```
+
+To run `screenie` and take a screenshot:
+
+```bash
+screenie --screenshot
+```
+
+To run `screenie` and take a picture:
+
+```bash
+screenie --picture
+```
+
+To run `screenie` with a specific voice and voice provider:
+
+```bash
+screenie --voice "onyx" --voice-provider "openai"
 ```

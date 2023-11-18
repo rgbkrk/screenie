@@ -17,6 +17,8 @@ click = "^8.1.7"
 opencv-python = "^4.8.1.78"
 ipython = "^8.17.2"
 
+[tool.poetry.scripts]
+screenie = 'screenie.__main__:main'
 
 [tool.poetry.group.dev.dependencies]
 types-pillow = "^10.1.0.2"

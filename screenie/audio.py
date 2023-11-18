@@ -7,9 +7,7 @@ from ulid import ULID
 
 client = OpenAI()
 
-# I ran out of Elevenlabs tokens
-# USE_OPENAI_TTS = True
-
+# These are mine, you'll have to pass your own
 fry_voice = "6EvaNCRRpIUj6wm59JYE"
 attenborough_voice = "KhkNiIv7qAHQvKZrBvoJ"
 
