@@ -1,5 +1,5 @@
 import os
-from typing import Literal
+from typing import Literal, Optional
 
 from elevenlabs import generate, play
 from openai import OpenAI
@@ -8,20 +8,24 @@ from ulid import ULID
 client = OpenAI()
 
 # I ran out of Elevenlabs tokens
-#USE_OPENAI_TTS = True
+# USE_OPENAI_TTS = True
 
 fry_voice = "6EvaNCRRpIUj6wm59JYE"
 attenborough_voice = "KhkNiIv7qAHQvKZrBvoJ"
 
 
-def play_audio(text: str, provider=Literal["openai", "elevenlabs"]):
+def play_audio(
+    text: str,
+    provider=Literal["openai", "elevenlabs"],
+    voice: Optional[str] = None
+):
     audio: bytes
 
     if provider == "openai":
         response = client.audio.speech.create(
             model="tts-1",
-            voice="onyx",
-            input=text
+            voice="fable" if voice is None else voice,  # type: ignore
+            input=text,
         )
 
         audio = response.read()
@@ -30,8 +34,8 @@ def play_audio(text: str, provider=Literal["openai", "elevenlabs"]):
         generated_audio = generate(
             api_key=os.environ.get("ELEVENLABS_API_KEY"),
             text=text,
-            voice=fry_voice,
-            model="eleven_turbo_v2"
+            voice=attenborough_voice if voice is None else voice,
+            model="eleven_turbo_v2",
         )
 
         if isinstance(generated_audio, bytes):
@@ -52,4 +56,3 @@ def play_audio(text: str, provider=Literal["openai", "elevenlabs"]):
         f.write(audio)
 
     play(audio)
-

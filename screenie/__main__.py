@@ -1,14 +1,33 @@
 import time
 
+import click
 from openai import OpenAI
 
 from .audio import play_audio
-from .imaging import FRY_ENHANCED, analyze_image, take_screenshot
+from .imaging import analyze_image, take_screenshot
 
 client = OpenAI()
 
-def main():
 
+@click.command()
+@click.option("--prompt", default="attenborough", help="Choice of default prompt")  # noqa
+@click.option("--voice", help="Choice of voice")
+@click.option(
+    "--voice-provider",
+    type=click.Choice(["openai", "elevenlabs"]),
+    default="openai",
+    help="Choice of voice provider",
+)
+@click.option(
+    "--screenshot",
+    "wants_screenshot",
+    is_flag=True,
+    help="Whether to take a screenshot",
+)
+@click.option(
+    "--picture", "wants_picture", is_flag=False, help="Whether to take a picture"  # noqa
+)
+def main(prompt, voice, voice_provider, wants_screenshot, wants_picture):
     script = []
 
     print("Ready in 3...", end="", flush=True)
@@ -18,11 +37,16 @@ def main():
     print("1...", end="", flush=True)
     time.sleep(1)
 
-    while True:
-        base64_image = take_screenshot()
+    # TODO: `play()` a starting sound
 
-        # analyze screen 
-        print("👀 David is watching...")
+    while True:
+        if wants_picture:
+            raise NotImplementedError("Picture taking not yet implemented")
+        else:  # wants_screenshot is the default
+            base64_image = take_screenshot()
+
+        # analyze screen
+        print("👀 Watching...")
 
         # Write the image to the terminal using iTerm2 inline images protocol
         print("\033]1337;File=;inline=1:" + base64_image + "\a")
@@ -31,14 +55,15 @@ def main():
         analysis = analyze_image(
             base64_image,
             script=script,
-            prompt=FRY_ENHANCED,  # noqa
+            prompt=prompt,
         )
 
         print("🎙️ David says:")
         print(analysis)
 
-        play_audio(analysis, provider="openai")
+        play_audio(analysis, provider=voice_provider, voice=voice)
 
+        # Disabling to save tokens and $$$
         # script = script + [{"role": "assistant", "content": analysis}]
 
         time.sleep(1)
