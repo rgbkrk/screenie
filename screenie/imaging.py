@@ -1,6 +1,8 @@
 import base64
 import io
+import time
 
+import cv2
 import pyautogui
 from openai import OpenAI
 from PIL import Image
@@ -29,6 +31,7 @@ prompts = {
     Make it snarky and funny. Don't repeat yourself. Make it short."""  # noqa
 }
 
+
 def take_screenshot():
     screenshot = pyautogui.screenshot()
     image = screenshot.resize((512, 512), Image.LANCZOS)
@@ -41,6 +44,40 @@ def take_screenshot():
     # Encode the image in base64
     base64_image = base64.b64encode(buffer.read()).decode("utf-8")
     return base64_image
+
+
+def take_picture() -> str:
+    # Initialize the webcam
+    cap = cv2.VideoCapture(0)
+
+    try:
+        # Check if the webcam is opened correctly
+        if not cap.isOpened():
+            raise IOError("Cannot open webcam")
+
+        # Capture and discard a few frames to let the camera warm up
+        for _ in range(10):
+            ret, frame = cap.read()
+            time.sleep(0.001)
+
+        ret, frame = cap.read()
+        if not ret:
+            raise IOError("Cannot capture image from webcam")
+        
+        frame = cv2.resize(frame, (512, 512), interpolation=cv2.INTER_AREA)
+
+        # Convert the image to a byte array
+        is_success, buffer = cv2.imencode(".jpg", frame)
+        if not is_success:
+            raise IOError("Cannot convert image to byte array")
+
+        # Encode the byte array to base64
+        base64_str = base64.b64encode(buffer.tobytes()).decode()
+        return base64_str
+
+    finally:
+        # Release the webcam in the 'finally' block to ensure it's always executed
+        cap.release()
 
 
 def create_image_description_message(base64_image: str):

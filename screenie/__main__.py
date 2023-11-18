@@ -4,7 +4,7 @@ import click
 from openai import OpenAI
 
 from .audio import play_audio
-from .imaging import analyze_image, take_screenshot
+from .imaging import analyze_image, take_picture, take_screenshot
 
 client = OpenAI()
 
@@ -22,10 +22,15 @@ client = OpenAI()
     "--screenshot",
     "wants_screenshot",
     is_flag=True,
+    default=False,
     help="Whether to take a screenshot",
 )
 @click.option(
-    "--picture", "wants_picture", is_flag=False, help="Whether to take a picture"  # noqa
+    "--picture",
+    "wants_picture",
+    is_flag=True,
+    default=False,
+    help="Whether to take a picture",  # noqa
 )
 def main(prompt, voice, voice_provider, wants_screenshot, wants_picture):
     script = []
@@ -40,17 +45,22 @@ def main(prompt, voice, voice_provider, wants_screenshot, wants_picture):
     # TODO: `play()` a starting sound
 
     while True:
-        if wants_picture:
-            raise NotImplementedError("Picture taking not yet implemented")
-        else:  # wants_screenshot is the default
-            base64_image = take_screenshot()
+        if wants_picture and wants_screenshot:
+            raise ValueError("Can't take both a screenshot and a picture")
 
         # analyze screen
         print("👀 Watching...")
 
+        if wants_picture:
+            base64_image = take_picture()
+        else:  # wants_screenshot is the default
+            base64_image = take_screenshot()
+
+        time.sleep(0.1)
         # Write the image to the terminal using iTerm2 inline images protocol
         print("\033]1337;File=;inline=1:" + base64_image + "\a")
-        time.sleep(0.5)
+
+        time.sleep(0.1)
 
         analysis = analyze_image(
             base64_image,
