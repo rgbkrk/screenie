@@ -7,8 +7,6 @@ from ulid import ULID
 
 client = OpenAI()
 
-# These are mine, you'll have to pass your own
-fry_voice = "6EvaNCRRpIUj6wm59JYE"
 attenborough_voice = "KhkNiIv7qAHQvKZrBvoJ"
 
 

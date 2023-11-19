@@ -7,34 +7,15 @@ import pyautogui
 from openai import OpenAI
 from PIL import Image
 
+from .prompts import prompts
+
 client = OpenAI()
 
-prompts = {
-    "witty-programmer": """
-    You are a skilled and witty programmer and designer. Narrate the screenshot the human has sent as if you are deeply following along with their work.
-    Make it snarky and funny. Don't repeat yourself. Make it short. If I do anything remotely interesting, make a big deal about it!
-    """,  # noqa
-    "attenborough": """
-    You are Sir David Attenborough. Narrate the picture of the human and human activities as if it is a nature documentary.
-    Make it snarky and funny. Don't repeat yourself. Make it short. If I do anything remotely interesting, make a big deal about it!
-    """,  # noqa
-    "attenborough-enhanced": """
-    You are Sir David Attenborough. Narrate the picture of the human and human activities as if it is a nature documentary.
-    Make it snarky and funny. Don't repeat yourself. Make it short. If I do anything remotely interesting, make a big deal about it!
-    """,  # noqa
-    "fry-enhanced": """
-    You are Stephen Fry. Narrate the picture of the human and human activities as if it is a nature documentary.
-    Make it snarky and funny. Don't repeat yourself. Make it short. If I do anything remotely interesting, make a big deal about it!
-    """,  # noqa
-    "screen-praise": """
-    You are a skilled and witty programmer and designer. Find something of significant interest to critique or praise on the screen. Be concise and quick.
-    Make it snarky and funny. Don't repeat yourself. Make it short."""  # noqa
-}
 
-
-def take_screenshot():
+def take_screenshot(scale_factor=0.5) -> str:
     screenshot = pyautogui.screenshot()
-    image = screenshot.resize((512, 512), Image.LANCZOS)
+
+    image = screenshot.resize(screenshot.size * scale_factor, Image.LANCZOS)
 
     # Convert to WebP or PNG format in memory
     buffer = io.BytesIO()
@@ -46,7 +27,7 @@ def take_screenshot():
     return base64_image
 
 
-def take_picture() -> str:
+def take_picture(scale_factor=0.5) -> str:
     # Initialize the webcam
     cap = cv2.VideoCapture(0)
 
@@ -63,8 +44,12 @@ def take_picture() -> str:
         ret, frame = cap.read()
         if not ret:
             raise IOError("Cannot capture image from webcam")
-        
-        frame = cv2.resize(frame, (512, 512), interpolation=cv2.INTER_AREA)
+
+        frame = cv2.resize(
+            frame,
+            dsize=frame.size * scale_factor,
+            interpolation=cv2.INTER_AREA
+        )
 
         # Convert the image to a byte array
         is_success, buffer = cv2.imencode(".jpg", frame)
@@ -95,8 +80,9 @@ def create_image_description_message(base64_image: str):
     ]
 
 
-def analyze_image(base64_image: str, script, prompt='attenborough'):
+def analyze_image(base64_image: str, script, prompt="attenborough"):
     # If the named prompt is chosen, use it. Otherwise assume it's the actual prompt
+    print("Pulling prompt: " + prompt)
     system_prompt = prompts.get(prompt, prompt)
 
     response = client.chat.completions.create(

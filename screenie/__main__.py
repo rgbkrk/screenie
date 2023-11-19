@@ -4,13 +4,13 @@ import click
 from openai import OpenAI
 
 from .audio import play_audio
-from .imaging import analyze_image, take_picture, take_screenshot
+from .imaging import analyze_image, prompts, take_picture, take_screenshot
 
 client = OpenAI()
 
 
 @click.command()
-@click.option("--prompt", default="attenborough", help="Choice of default prompt")  # noqa
+@click.option("--prompt", default="attenborough", help="Choice of default prompt", type=click.Choice(prompts.keys()))  # noqa
 @click.option("--voice", help="Choice of voice")
 @click.option(
     "--voice-provider",
@@ -35,12 +35,22 @@ client = OpenAI()
 def main(prompt, voice, voice_provider, wants_screenshot, wants_picture):
     script = []
 
+    print("Configuration: ")
+    print(f"  Prompt: {prompt}")
+    print(f"  Voice: {voice}")
+    print(f"  Voice provider: {voice_provider}")
+    print(f"  Mode: {'screenshot' if wants_screenshot else 'picture'}")
+
+    print("eh ", prompt in prompts)
+    print("eh ey ", prompts.get(prompt, prompt))
+
     print("Ready in 3...", end="", flush=True)
     time.sleep(1)
     print("2...", end="", flush=True)
     time.sleep(1)
     print("1...", end="", flush=True)
     time.sleep(1)
+    print("Go!")
 
     # TODO: `play()` a starting sound
 
@@ -74,7 +84,7 @@ def main(prompt, voice, voice_provider, wants_screenshot, wants_picture):
         play_audio(analysis, provider=voice_provider, voice=voice)
 
         # Disabling to save tokens and $$$
-        # script = script + [{"role": "assistant", "content": analysis}]
+        script = script + [{"role": "assistant", "content": analysis}]
 
         time.sleep(1)
 
