@@ -12,10 +12,17 @@ from .prompts import prompts
 client = OpenAI()
 
 
-def take_screenshot(scale_factor=0.5) -> str:
+def take_screenshot(scale_factor=0.2) -> str:
     screenshot = pyautogui.screenshot()
 
-    image = screenshot.resize(screenshot.size * scale_factor, Image.LANCZOS)
+    new_size = (
+        int(screenshot.size[0] * scale_factor),
+        int(screenshot.size[1] * scale_factor),
+    )
+
+    print(new_size)
+
+    image = screenshot.resize(new_size, Image.LANCZOS)
 
     # Convert to WebP or PNG format in memory
     buffer = io.BytesIO()
@@ -27,7 +34,7 @@ def take_screenshot(scale_factor=0.5) -> str:
     return base64_image
 
 
-def take_picture(scale_factor=0.5) -> str:
+def take_picture(scale_factor=0.2) -> str:
     # Initialize the webcam
     cap = cv2.VideoCapture(0)
 
@@ -45,10 +52,13 @@ def take_picture(scale_factor=0.5) -> str:
         if not ret:
             raise IOError("Cannot capture image from webcam")
 
+        new_size = (
+            int(frame.shape[1] * scale_factor),
+            int(frame.shape[0] * scale_factor),
+        )
+
         frame = cv2.resize(
-            frame,
-            dsize=frame.size * scale_factor,
-            interpolation=cv2.INTER_AREA
+            frame, dsize=new_size, interpolation=cv2.INTER_AREA
         )
 
         # Convert the image to a byte array
@@ -82,7 +92,6 @@ def create_image_description_message(base64_image: str):
 
 def analyze_image(base64_image: str, script, prompt="attenborough"):
     # If the named prompt is chosen, use it. Otherwise assume it's the actual prompt
-    print("Pulling prompt: " + prompt)
     system_prompt = prompts.get(prompt, prompt)
 
     response = client.chat.completions.create(

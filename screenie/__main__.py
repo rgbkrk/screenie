@@ -41,9 +41,6 @@ def main(prompt, voice, voice_provider, wants_screenshot, wants_picture):
     print(f"  Voice provider: {voice_provider}")
     print(f"  Mode: {'screenshot' if wants_screenshot else 'picture'}")
 
-    print("eh ", prompt in prompts)
-    print("eh ey ", prompts.get(prompt, prompt))
-
     print("Ready in 3...", end="", flush=True)
     time.sleep(1)
     print("2...", end="", flush=True)
@@ -78,12 +75,11 @@ def main(prompt, voice, voice_provider, wants_screenshot, wants_picture):
             prompt=prompt,
         )
 
-        print("🎙️ David says:")
+        print("🎙️ Narrator says:")
         print(analysis)
 
         play_audio(analysis, provider=voice_provider, voice=voice)
 
-        # Disabling to save tokens and $$$
         script = script + [{"role": "assistant", "content": analysis}]
 
         time.sleep(1)
